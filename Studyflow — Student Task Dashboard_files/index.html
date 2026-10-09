@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="Organize your coursework and keep track of every student task with StudyFlow.">
+  <title>StudyFlow — Student Task Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="StudyFlow home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>StudyFlow</span>
+      </a>
+      <div class="topbar-note">
+        <span class="online-dot" aria-hidden="true"></span>
+        <span>Your study space</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="welcome-row" aria-labelledby="welcome-heading">
+        <div>
+          <p class="eyebrow" id="today-label"></p>
+          <h1 id="welcome-heading">Make room for <span>what matters.</span></h1>
+          <p class="welcome-copy">A little progress each day adds up to big results.</p>
+        </div>
+        <button class="button button-primary add-task-button" id="add-task-button" type="button">
+          <span aria-hidden="true">+</span> Add a task
+        </button>
+      </section>
+
+      <section class="stats-grid" aria-label="Task overview">
+        <article class="stat-card stat-total">
+          <div class="stat-top"><span class="stat-label">Total tasks</span><span class="stat-icon" aria-hidden="true">▤</span></div>
+          <p class="stat-value" id="stat-total">0</p>
+          <p class="stat-caption">Across all your subjects</p>
+        </article>
+        <article class="stat-card stat-pending">
+          <div class="stat-top"><span class="stat-label">Pending</span><span class="stat-icon" aria-hidden="true">◷</span></div>
+          <p class="stat-value" id="stat-pending">0</p>
+          <p class="stat-caption">Ready when you are</p>
+        </article>
+        <article class="stat-card stat-progress">
+          <div class="stat-top"><span class="stat-label">In progress</span><span class="stat-icon" aria-hidden="true">↗</span></div>
+          <p class="stat-value" id="stat-progress">0</p>
+          <p class="stat-caption">Keep up the momentum</p>
+        </article>
+        <article class="stat-card stat-completed">
+          <div class="stat-top"><span class="stat-label">Completed</span><span class="stat-icon" aria-hidden="true">✓</span></div>
+          <p class="stat-value" id="stat-completed">0</p>
+          <p class="stat-caption">Look how far you've come</p>
+        </article>
+        <article class="stat-card stat-overdue">
+          <div class="stat-top"><span class="stat-label">Overdue</span><span class="stat-icon" aria-hidden="true">!</span></div>
+          <p class="stat-value" id="stat-overdue">0</p>
+          <p class="stat-caption">Tasks that need attention</p>
+        </article>
+      </section>
+
+      <section class="tasks-section" aria-labelledby="tasks-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR WORKSPACE</p>
+            <h2 id="tasks-heading">My tasks <span class="count-pill" id="visible-count">0</span></h2>
+          </div>
+        </div>
+
+        <div class="message" id="message" role="status" aria-live="polite" hidden></div>
+
+        <div class="toolbar" role="search" aria-label="Search and filter tasks">
+          <label class="search-field">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <span class="sr-only">Search tasks</span>
+            <input id="search-input" type="search" placeholder="Search tasks, subjects, or notes..." autocomplete="off">
+          </label>
+          <label class="select-field">
+            <span class="sr-only">Filter by status</span>
+            <select id="status-filter">
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="in-progress">In progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </label>
+          <label class="select-field">
+            <span class="sr-only">Filter by subject</span>
+            <select id="subject-filter">
+              <option value="all">All subjects</option>
+            </select>
+          </label>
+          <label class="select-field sort-field">
+            <span class="sr-only">Sort tasks</span>
+            <select id="sort-select">
+              <option value="due-asc">Due date: soonest</option>
+              <option value="due-desc">Due date: latest</option>
+              <option value="priority-desc">Priority: highest</option>
+              <option value="title-asc">Title: A to Z</option>
+              <option value="created-desc">Recently added</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="task-list" id="task-list" aria-live="polite"></div>
+        <div class="empty-state" id="empty-state">
+          <div class="empty-illustration" aria-hidden="true">✦</div>
+          <h3 id="empty-title">A fresh page</h3>
+          <p id="empty-copy">Add your first task and start building momentum.</p>
+          <button class="button button-secondary" id="empty-add-button" type="button">Add your first task</button>
+        </div>
+      </section>
+
+      <footer class="footer-note">Made for your next <span>big idea</span>.</footer>
+    </main>
+  </div>
+
+  <dialog class="task-dialog" id="task-dialog" aria-labelledby="dialog-title">
+    <form id="task-form" novalidate>
+      <input id="task-id" type="hidden">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">MAKE IT HAPPEN</p>
+          <h2 id="dialog-title">Add a task</h2>
+        </div>
+        <button class="icon-button close-dialog" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="form-field">
+        <label for="task-title">Task title <span class="required-mark" aria-hidden="true">*</span></label>
+        <input id="task-title" name="title" type="text" maxlength="120" placeholder="e.g. Read chapter 4" aria-describedby="title-error">
+        <span class="field-error" id="title-error"></span>
+      </div>
+
+      <div class="form-field">
+        <label for="task-description">Notes <span class="field-hint">(optional)</span></label>
+        <textarea id="task-description" name="description" rows="3" maxlength="1000" placeholder="Add a few details to help you get started..."></textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="task-subject">Subject <span class="required-mark" aria-hidden="true">*</span></label>
+        <input id="task-subject" name="subject" type="text" maxlength="60" placeholder="e.g. Biology" aria-describedby="subject-error">
+        <span class="field-error" id="subject-error"></span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="task-due-date">Due date <span class="required-mark" aria-hidden="true">*</span></label>
+          <input id="task-due-date" name="dueDate" type="date" aria-describedby="due-date-error">
+          <span class="field-error" id="due-date-error"></span>
+        </div>
+        <div class="form-field">
+          <label for="task-priority">Priority</label>
+          <select id="task-priority" name="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="task-status">Status</label>
+        <select id="task-status" name="status">
+          <option value="pending" selected>Pending</option>
+          <option value="in-progress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      <div class="form-error" id="form-error" role="alert" hidden></div>
+      <div class="dialog-actions">
+        <button class="button button-quiet close-dialog" type="button">Cancel</button>
+        <button class="button button-primary" id="save-task-button" type="submit">Save task</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
